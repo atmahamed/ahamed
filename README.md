@@ -1,4 +1,3 @@
-
 create table Employee(
   EmployeeID int not null identity(1,1) primary key,
   FirstName varchar(30),
@@ -278,22 +277,30 @@ Create procedure ApplyJob(
   
 
   
-Create procedure ApplyJob(
-  @Mode char(1),
+Create procedure GetAppliedJobs(
   @PostedJobID int,
   @EmployerID int,
   @EmployeeID int
-  )
+  ) 
   AS
   BEGIN
-    IF @Mode = 'A'
-      BEGIN
-        INSERT INTO AppliedJobs(PostedJobID,EmployeeID,EmployerID,AppliedDate,CreatedOn)
-        VALUES (@PostedJobID,@EmployeeID,@EmployerID,@AppliedDate,GETDATE())
-      END
-    ELSE IF @Mode = 'D'
-       BEGIN
-         DELETE FROM AppliedJobs WHERE AppliedJobID = @AppliedJobID
-       END
+    SELECT APP.AppliedJobID, APP.PostedJobID, APP.EmployeeID, APP.EmployerID, EMP.CompanyName APP.AppliedDate,
+    POS.Description, POS.EmployeeDesignation, POS.PostedDate, POS.Salary 
+    FROM PostedJobs POS INNER JOIN AppliedJobs APP ON POS.PostedJobID = APP.PostedJobID
+    INNER JOIN Employer EMP ON EMP.EmployerID = APP.EmployerID
+    WHERE APP.EmployeeID = @EmployeeID
+    ORDER BY APP.AppliedDate DESC
   END
- 
+
+
+Create procedure GetPostedJobs(
+  @PostedJobID int,
+  @EmployerID int
+  ) 
+  AS
+  BEGIN
+    SELECT PostedJobID,EmployerID,EmployeeDesignation,Description,Salary,PostedDate,Active
+    FROM PostedJobs WHERE EmployerID = @EmployerID
+  END
+
+
